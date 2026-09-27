@@ -3,6 +3,7 @@ Lightweight smoke tests: enough to catch broken views/templates/PDF
 generation without over-engineering the test suite.
 """
 
+from django.apps import apps
 from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -21,6 +22,21 @@ class SeedDataTests(TestCase):
     def test_seed_is_idempotent(self):
         call_command("seed_data")
         self.assertEqual(Law.objects.count(), 3)
+
+    def test_seeded_values_fit_their_column_limits(self):
+        # SQLite doesn't enforce max_length but Postgres does, so an
+        # over-long seed value passes locally and only fails once deployed.
+        too_long = []
+        for model in apps.get_app_config("comparison").get_models():
+            for field in model._meta.concrete_fields:
+                limit = getattr(field, "max_length", None)
+                if not limit or field.get_internal_type() == "TextField":
+                    continue
+                for obj in model.objects.all():
+                    value = getattr(obj, field.name) or ""
+                    if len(str(value)) > limit:
+                        too_long.append(f"{model.__name__}.{field.name} pk={obj.pk}")
+        self.assertEqual(too_long, [])
 
 
 class ViewTests(TestCase):

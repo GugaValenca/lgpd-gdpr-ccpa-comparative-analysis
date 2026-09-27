@@ -108,8 +108,8 @@ class ComparisonEntry(models.Model):
     law = models.ForeignKey(Law, related_name="entries", on_delete=models.CASCADE)
 
     summary = models.CharField(
-        max_length=300,
-        help_text="Short one-line takeaway shown in the comparison table/cards.",
+        max_length=600,
+        help_text="One- or two-sentence takeaway shown in the comparison table/cards.",
     )
     details = models.TextField(
         blank=True,
