@@ -8,8 +8,16 @@ env/
 *.log
 .DS_Store
 staticfiles/
+
+# Real environment files (the committed template is .env.example)
 .env
+.env.local
 
 .vercel
 .mypy_cache/
 .ruff_cache/
+
+# Local tooling folders that hosting CLIs may drop into the project
+.agents/
+.claude/
+skills-lock.json
