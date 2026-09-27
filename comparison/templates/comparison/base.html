@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LGPD · GDPR · CCPA Comparative Analysis{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'comparison/css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap header-inner">
+            <a class="brand" href="{% url 'comparison:home' %}">
+                <span class="brand-mark">⚖️</span>
+                <span>Privacy Law Comparative Analysis</span>
+            </a>
+            <nav class="site-nav">
+                <a href="{% url 'comparison:home' %}">Compare Laws</a>
+                <a href="{% url 'comparison:scenario_form' %}">Compliance Summary</a>
+                <a href="{% url 'comparison:about' %}">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>
+                A side-by-side comparison of LGPD (Brazil), GDPR (EU), and CCPA/CPRA (California).
+                Not legal advice — see the <a href="{% url 'comparison:about' %}">About</a> page.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{% extends "comparison/base.html" %}
+{% load static %}
+
+{% block title %}Compare Laws — LGPD · GDPR · CCPA{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+    <h1>Compare LGPD, GDPR, and CCPA/CPRA</h1>
+    <p>
+        Browse how Brazil's LGPD, the EU's GDPR, and California's CCPA/CPRA treat the same
+        compliance question, side by side. Filter by category or search for a keyword.
+    </p>
+</section>
+
+<section class="controls">
+    <form method="get" class="search-form" role="search">
+        <input
+            type="search"
+            name="q"
+            value="{{ query }}"
+            placeholder="Search categories and entries (e.g. 'consent', 'fines', 'children')"
+            aria-label="Search comparison content"
+        >
+        <button type="submit">Search</button>
+        {% if query %}
+            <a class="clear-link" href="{% url 'comparison:home' %}">Clear</a>
+        {% endif %}
+    </form>
+
+    <div class="category-filter" id="category-filter" role="group" aria-label="Filter by category">
+        <button type="button" class="chip is-active" data-filter="all">All categories</button>
+        {% for category in categories %}
+            <button type="button" class="chip" data-filter="{{ category.slug }}">
+                {{ category.icon }} {{ category.name }}
+            </button>
+        {% endfor %}
+    </div>
+</section>
+
+{% if not categories %}
+    <p class="empty-state">No categories match "{{ query }}". Try a different search term.</p>
+{% endif %}
+
+<section class="comparison-grid" id="comparison-grid">
+    {% for category in categories %}
+        <article class="category-card" data-category="{{ category.slug }}">
+            <header class="category-card-header">
+                <h2>{{ category.icon }} {{ category.name }}</h2>
+                {% if category.description %}
+                    <p class="category-desc">{{ category.description }}</p>
+                {% endif %}
+            </header>
+
+            <div class="law-columns">
+                {% for entry in category.entries.all %}
+                    <div class="law-column" style="--law-color: {{ entry.law.color_hex }}">
+                        <div class="law-badge">{{ entry.law.code }}</div>
+                        <p class="entry-summary">{{ entry.summary }}</p>
+                        {% if entry.details %}
+                            <details class="entry-details">
+                                <summary>More detail</summary>
+                                <p>{{ entry.details|linebreaksbr }}</p>
+                                {% if entry.source_url %}
+                                    <p class="entry-source">
+                                        <a href="{{ entry.source_url }}" target="_blank" rel="noopener">
+                                            Source ↗
+                                        </a>
+                                    </p>
+                                {% endif %}
+                            </details>
+                        {% endif %}
+                        {% if not entry.is_verified %}
+                            <p class="unverified-flag" title="{{ entry.verification_notes }}">
+                                ⚠ Unverified — pending source check
+                            </p>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="empty-state">No entries yet for this category.</p>
+                {% endfor %}
+            </div>
+        </article>
+    {% endfor %}
+</section>
+
+<script src="{% static 'comparison/js/filter.js' %}"></script>
+{% endblock %}

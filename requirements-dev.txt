@@ -1,0 +1,9 @@
+# Development-only tooling: not needed to run the app, only to work on it
+# (formatting, linting, dependency audit). Install alongside requirements.txt:
+#   pip install -r requirements.txt -r requirements-dev.txt
+-r requirements.txt
+
+black>=24.0
+ruff>=0.6
+isort>=5.13
+pip-audit>=2.7

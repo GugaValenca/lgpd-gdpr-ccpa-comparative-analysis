@@ -1,0 +1,117 @@
+{% extends "comparison/base.html" %}
+
+{% block title %}About — LGPD · GDPR · CCPA Comparative Analysis{% endblock %}
+
+{% block content %}
+<section class="about-page">
+    <h1>About this project</h1>
+
+    <p>
+        Gustavo Valença is a Brazilian-trained lawyer with experience leading legal teams,
+        working across Python/Django development and data privacy law. This tool takes a body
+        of legal knowledge and turns it into something a technical team can actually run,
+        query, and extend, rather than writing another article about data protection law.
+    </p>
+    <p>
+        LGPD, GDPR, and CCPA/CPRA share a common ancestry and a common goal — giving individuals
+        more control over their personal data — but they diverge in real, consequential ways:
+        who they cover, what makes processing lawful, what a business must document, and who can
+        sue whom. Those divergences are exactly what a privacy or data governance team has to
+        track day to day, usually across spreadsheets, memos, and institutional memory. This
+        project asks a narrower, more concrete question: what does that comparison look like when
+        it's modeled as data instead of prose, and what can you build once it is?
+    </p>
+
+    <h2>Why this project, and why it's built this way</h2>
+    <ul>
+        <li>
+            <strong>Legal content as structured data, not a static document.</strong> Every
+            comparison point lives in a Django model (Category × Law → ComparisonEntry), editable
+            through the admin rather than hardcoded into a template. Adding a new comparison
+            dimension — say, international data transfer rules — means adding rows, not rewriting
+            pages. It's the same shape a real compliance team's internal knowledge base would take.
+        </li>
+        <li>
+            <strong>A working tool, not just a reference.</strong> The "Generate compliance
+            summary" feature takes a short factual questionnaire about a business and produces a
+            downloadable PDF stating which frameworks are triggered and why — the same first move
+            a privacy analyst makes when a business team asks "does this law apply to us?" The
+            underlying applicability logic (an auditable set of AND/OR rules per law, not
+            scattered if-statements) is unit-tested, because a compliance tool that quietly gives
+            the wrong answer is worse than no tool at all.
+        </li>
+        <li>
+            <strong>Accuracy disciplined by process, not by memory.</strong> Every legal fact in
+            this project's seed data — every article citation, every fine amount, every
+            threshold — was checked against a primary or regulatory source (planalto.gov.br,
+            eur-lex.europa.eu, leginfo.legislature.ca.gov, cppa.ca.gov) and is marked as verified,
+            with the specific source and the date it was checked recorded alongside it. Figures
+            that change on a statutory schedule (CCPA/CPRA's inflation-adjusted thresholds and
+            fine amounts, for instance) are flagged with when they're next due to move. Nothing on
+            this site is legal advice, but nothing on it is guesswork, either.
+        </li>
+    </ul>
+
+    <h2>Why it matters</h2>
+    <p>
+        A data governance and privacy analyst spends much of their time doing exactly this kind
+        of translation: reading statutory text, distilling it into rules an organization can
+        actually operationalize, and keeping that mapping current as the law changes. This
+        tool covers both halves: the legal analysis behind each rule, and the implementation
+        that makes it queryable, testable, and auditable.
+    </p>
+
+    <h2>Tech stack</h2>
+    <p>
+        Django (data model, admin, views/templates), vanilla JavaScript for client-side
+        filtering, and ReportLab for PDF generation, configured to deploy on Vercel with Postgres —
+        deliberately conventional choices so every line of the implementation is easy to explain and defend, not just something
+        that works. See the project
+        README for the full technical write-up.
+    </p>
+
+    <h2>Related tools</h2>
+    <p>
+        This is one of four related tools. Each one targets a different piece of what a
+        privacy/data governance analyst actually does, and together they follow a processing
+        activity through its life cycle:
+    </p>
+    <ol>
+        <li>
+            <strong>LGPD-GDPR-CCPA-Comparative-Analysis</strong> (this project) — which laws
+            apply, and how they differ.
+        </li>
+        <li>
+            <strong>Data-Mapping-ROPA</strong> — recording the processing activities a company
+            already runs, as a queryable Record of Processing Activities.
+            <a href="https://data-mapping-ropa.vercel.app" target="_blank" rel="noopener">Live demo</a> ·
+            <a href="https://github.com/GugaValenca/Data-Mapping-ROPA" target="_blank" rel="noopener">Code</a>
+        </li>
+        <li>
+            <strong>DPIA-Privacy-Impact-Assessment</strong> — assessing a new processing
+            activity <em>before</em> it launches, with a guided workflow, a risk score, and an
+            exportable report.
+            <a href="https://dpia-privacy-impact-assessment.vercel.app" target="_blank" rel="noopener">Live demo</a> ·
+            <a href="https://github.com/GugaValenca/dpia-privacy-impact-assessment" target="_blank" rel="noopener">Code</a>
+        </li>
+        <li>
+            <strong>Incident-Breach-Response</strong> — what to do when something goes wrong:
+            which breach notifications LGPD, GDPR and California law require, to whom, and by
+            when, with a response checklist and an exportable incident report.
+            <a href="https://incident-breach-response.vercel.app" target="_blank" rel="noopener">Live demo</a> ·
+            <a href="https://github.com/GugaValenca/incident-breach-response" target="_blank" rel="noopener">Code</a>
+        </li>
+    </ol>
+    <p>
+        The other three tools share one fictional e-commerce company, so the same scenario can
+        be followed from the data map to the impact assessment to the incident response.
+    </p>
+
+    <h2>Get in touch</h2>
+    <p>
+        Gustavo Valença ·
+        <a href="https://www.linkedin.com/in/gugavalenca/" target="_blank" rel="noopener">LinkedIn</a> ·
+        <a href="https://github.com/GugaValenca" target="_blank" rel="noopener">GitHub</a>
+    </p>
+</section>
+{% endblock %}

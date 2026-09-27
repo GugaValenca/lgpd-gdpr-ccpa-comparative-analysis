@@ -1,0 +1,73 @@
+{% extends "comparison/base.html" %}
+
+{% block title %}Your Compliance Summary{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+    <h1>Compliance summary{% if company_name %} for {{ company_name }}{% endif %}</h1>
+    <p>
+        Based on your answers, here is which frameworks are likely triggered and the key
+        obligations each one brings.
+    </p>
+    <div class="actions-row">
+        <a class="btn-primary" href="{% url 'comparison:scenario_pdf' %}">Download PDF</a>
+        <a class="btn-secondary" href="{% url 'comparison:scenario_form' %}">Edit answers</a>
+    </div>
+</section>
+
+<section class="applicability-overview">
+    <h2>Applicability at a glance</h2>
+    <table class="applicability-table">
+        <thead>
+            <tr><th>Framework</th><th>Applies?</th></tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.law.code }}</td>
+                    <td class="{% if result.applies %}applies-yes{% else %}applies-no{% endif %}">
+                        {% if result.applies %}Yes{% else %}No{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% if not applicable %}
+    <p class="empty-state">
+        Based on your answers, none of the three frameworks appear to be triggered.
+        Double-check your answers if this seems unexpected — applicability is fact-specific.
+    </p>
+{% endif %}
+
+{% for section in sections %}
+    <section class="law-summary-section" style="--law-color: {{ section.law.color_hex }}">
+        <h2>{{ section.law.code }} — {{ section.law.full_name }}</h2>
+
+        {% if section.matched_questions %}
+            <p class="matched-reasons">
+                <strong>Why it applies:</strong> {{ section.matched_questions|join:"; " }}
+            </p>
+        {% endif %}
+
+        {% for entry in section.obligations %}
+            <div class="obligation-item">
+                <h3>{{ entry.category.name }}</h3>
+                <p>{{ entry.summary }}</p>
+                {% if not entry.is_verified %}
+                    <p class="unverified-flag">⚠ Unverified — confirm against primary source</p>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p class="empty-state">No obligation content seeded for this law yet.</p>
+        {% endfor %}
+    </section>
+{% endfor %}
+
+<p class="disclaimer">
+    This summary is generated from a simplified self-assessment questionnaire for informational
+    and educational purposes only. It is not legal advice. Applicability of any privacy law to a
+    real business depends on its full facts and should be confirmed with qualified counsel.
+</p>
+{% endblock %}

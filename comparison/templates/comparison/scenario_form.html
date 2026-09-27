@@ -1,0 +1,49 @@
+{% extends "comparison/base.html" %}
+
+{% block title %}Compliance Summary — LGPD · GDPR · CCPA{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+    <h1>Generate a compliance summary</h1>
+    <p>
+        Answer a few questions about a hypothetical (or real) business, and this tool will
+        indicate which of the three frameworks are likely triggered and summarize the key
+        obligations — as a starting point, not a legal opinion.
+    </p>
+</section>
+
+<form method="post" class="scenario-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-field">
+        {{ form.company_name.label_tag }}
+        {{ form.company_name }}
+    </div>
+
+    <fieldset class="scenario-questions">
+        <legend>About the business</legend>
+        {% for field in form %}
+            {% if field.name != "company_name" %}
+                <div class="question-block">
+                    <p class="question-text">{{ field.label }}</p>
+                    {% if field.help_text %}
+                        <p class="question-help">{{ field.help_text }}</p>
+                    {% endif %}
+                    <div class="radio-row">
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                        <p class="field-error">{{ field.errors }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </fieldset>
+
+    <button type="submit" class="btn-primary">Generate summary</button>
+</form>
+{% endblock %}
