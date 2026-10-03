@@ -1,5 +1,6 @@
 Django==5.2.17
 reportlab==5.0.1
+django-ratelimit>=4.1
 
 # Production/deployment (Vercel): Postgres support + static file serving
 # without a separate collectstatic build step. Harmless locally — SQLite

@@ -53,7 +53,7 @@
 
             <div class="law-columns">
                 {% for entry in category.entries.all %}
-                    <div class="law-column" style="--law-color: {{ entry.law.color_hex }}">
+                    <div class="law-column law-color-{{ entry.law.code|slugify }}">
                         <div class="law-badge">{{ entry.law.code }}</div>
                         <p class="entry-summary">{{ entry.summary }}</p>
                         {% if entry.details %}

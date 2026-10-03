@@ -11,6 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "Django==5.2.17",
     "reportlab==5.0.1",
+    "django-ratelimit>=4.1",
     "dj-database-url>=2.1",
     "psycopg[binary]>=3.1",
     "whitenoise>=6.6",

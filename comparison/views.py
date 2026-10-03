@@ -2,15 +2,29 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
+from django_ratelimit.decorators import ratelimit
 
 from .forms import ScenarioForm
 from .models import Category, Law
 from .pdf import render_scenario_pdf
 from .services import build_summary_context
+from .throttling import client_ip
 
 SESSION_KEY = "scenario_answers"
+
+# The scenario form and PDF export accept writes/generation requests from
+# anonymous visitors, so each shares one per-IP budget — PDF generation
+# (the most CPU-expensive request) gets its own, tighter one. Over-limit
+# requests get a 403.
+WRITE_RATE = "30/m"
+PDF_RATE = "10/m"
+limit_writes = ratelimit(
+    group="writes", key=client_ip, rate=WRITE_RATE, method="POST", block=True
+)
+limit_pdf = ratelimit(group="pdf", key=client_ip, rate=PDF_RATE, block=True)
 
 
 class ComparisonView(View):
@@ -53,6 +67,7 @@ class ScenarioFormView(View):
         form = ScenarioForm()
         return render(request, self.template_name, {"form": form})
 
+    @method_decorator(limit_writes)
     def post(self, request):
         form = ScenarioForm(request.POST)
         if form.is_valid():
@@ -76,6 +91,7 @@ class ScenarioResultView(View):
         return render(request, self.template_name, context)
 
 
+@limit_pdf
 def scenario_pdf(request):
     """Regenerate the same summary from session data and stream it as a PDF."""
     data = request.session.get(SESSION_KEY)

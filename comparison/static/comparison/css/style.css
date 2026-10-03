@@ -19,6 +19,16 @@
     --max-width: 1080px;
 }
 
+/* Per-law accent colors, keyed by `{{ law.code|slugify }}` (see home.html
+   and scenario_result.html). Set as a class instead of an inline
+   `style="--law-color: ..."` attribute so the site can run under a strict
+   Content-Security-Policy with no `style-src 'unsafe-inline'`. Mirrors
+   each Law.color_hex value in seed_data.py — keep in sync if either
+   changes, and add a rule here for any new law. */
+.law-color-lgpd { --law-color: #0d9488; }
+.law-color-gdpr { --law-color: #2563eb; }
+.law-color-ccpacpra { --law-color: #dc2626; }
+
 * { box-sizing: border-box; }
 
 body {

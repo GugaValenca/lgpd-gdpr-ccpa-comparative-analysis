@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django_ratelimit.decorators import ratelimit
 
 from .models import Category, ComparisonEntry, Law, ScenarioQuestion, ScenarioRule
+from .throttling import client_ip
 
 
 @admin.register(Law)
@@ -45,3 +47,12 @@ class ScenarioQuestionAdmin(admin.ModelAdmin):
 admin.site.site_header = "LGPD / GDPR / CCPA Comparative Analysis — Admin"
 admin.site.site_title = "Privacy Law Comparison Admin"
 admin.site.index_title = "Content management"
+
+# The login form is the one publicly reachable, unauthenticated endpoint in
+# this app, so it's the one worth rate limiting against brute force. Wraps
+# the existing admin site's bound login method directly (rather than
+# swapping in a new AdminSite instance) so every @admin.register() call
+# above keeps registering against the same site that urls.py serves.
+admin.site.login = ratelimit(  # type: ignore[method-assign]
+    key=client_ip, rate="5/m", method="POST", block=True
+)(admin.site.login)

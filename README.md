@@ -180,6 +180,27 @@ the same `build_summary_context()` call, so they can never drift apart.
   username/password. `db.sqlite3` is git-ignored, and all legal content
   lives in `comparison/management/commands/seed_data.py`, not in the
   database file.
+- The scenario form, its PDF export, and the admin login all accept
+  requests from anonymous visitors, so each is rate-limited per visitor
+  (`comparison/views.py`, `comparison/admin.py`) — 30/min for form
+  submissions, 10/min for PDF generation (the most CPU-expensive request),
+  5/min for admin login attempts. The limiter key trusts Vercel's
+  `X-Real-IP` header only when actually running on Vercel
+  (`RUNNING_ON_VERCEL`, `comparison/throttling.py`); elsewhere a client
+  could set that header to anything, so `REMOTE_ADDR` is used instead.
+- Every page sends a strict `Content-Security-Policy` header (same-origin
+  script/style only, no framing, no plugins — `comparison/middleware.py`).
+  Django 6.0 ships CSP support built in; this project pins Django 5.2 (the
+  LTS release current when it was built), so it's a small stand-in
+  middleware with an equivalent policy instead.
+- `company_name` on the scenario form is free text from an anonymous
+  public form that gets embedded in the generated PDF. ReportLab's
+  `Paragraph` parses a small HTML/XML-like markup language, so this value
+  (and everything else dynamic going into the PDF) is escaped
+  (`comparison/pdf.py::_safe`) before being embedded — otherwise a value
+  like `<font size=40>` could inject formatting, or an unclosed tag could
+  crash PDF generation with an unhandled 500. Covered by a regression test
+  (`test_scenario_pdf_rejects_markup_injection_in_company_name`).
 
 ## Deployment (Vercel)
 
@@ -208,6 +229,7 @@ and the questionnaire's session state is stored in the database too.
    Vercel's build step doesn't run this for you):
    ```bash
    DATABASE_URL="<value from Vercel's Storage tab>" python manage.py migrate
+   DATABASE_URL="<same value>" python manage.py createcachetable   # rate-limit counters
    DATABASE_URL="<same value>" python manage.py seed_data
    DATABASE_URL="<same value>" python manage.py createsuperuser
    ```

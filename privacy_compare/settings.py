@@ -70,10 +70,15 @@ else:
         if o.strip()
     ]
 
+# Whether this process is running on Vercel at all (preview or
+# production) — used both for the HTTPS-proxy header below and to decide
+# whether comparison/throttling.py can trust X-Real-IP for rate limiting.
+RUNNING_ON_VERCEL = bool(os.environ.get("VERCEL"))
+
 # Vercel terminates TLS at the edge and forwards requests to the app over
 # plain HTTP with this header set — without it Django can't tell the
 # request was actually HTTPS, which breaks CSRF and secure-cookie checks.
-if os.environ.get("VERCEL"):
+if RUNNING_ON_VERCEL:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Production hardening, driven by `manage.py check --deploy`.
@@ -112,6 +117,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "comparison.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "privacy_compare.urls"
@@ -151,6 +157,25 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+
+# Cache — where the rate limits on the scenario form and PDF export
+# (comparison/views.py) keep their counters. Django's default in-memory
+# cache is per process, and on Vercel every serverless instance is its own
+# process, so each one would count separately and the limits would barely
+# apply. With a real database configured, the counters live in a Postgres
+# table instead, shared by every instance. The table is created by
+# `manage.py createcachetable` (see the README's deployment steps); locally
+# and in tests, no DATABASE_URL means this block is skipped and Django
+# falls back to its default per-process in-memory cache, which is fine
+# since there's only one process to share counters across.
+if _database_url:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+            "LOCATION": "django_cache",
         }
     }
 

@@ -42,7 +42,7 @@
 {% endif %}
 
 {% for section in sections %}
-    <section class="law-summary-section" style="--law-color: {{ section.law.color_hex }}">
+    <section class="law-summary-section law-color-{{ section.law.code|slugify }}">
         <h2>{{ section.law.code }} — {{ section.law.full_name }}</h2>
 
         {% if section.matched_questions %}

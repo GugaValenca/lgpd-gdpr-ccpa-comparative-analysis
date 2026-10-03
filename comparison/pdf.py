@@ -10,6 +10,7 @@ result page and the PDF are always describing the same scenario.
 """
 
 import io
+from xml.sax.saxutils import escape as _xml_escape
 
 from django.utils import timezone
 from reportlab.lib import colors
@@ -35,6 +36,23 @@ DISCLAIMER = (
     "business depends on its full facts and should be confirmed with qualified counsel "
     "and against the official statutory text."
 )
+
+
+def _safe(text):
+    """
+    Escape text before it's interpolated into a ReportLab Paragraph string.
+
+    Paragraph() parses its input as a small HTML/XML-like markup language
+    (it understands tags like <b>, <font color=...>, even <a href=...>).
+    `company_name` comes straight from the public scenario form with no
+    sanitization, so without this, a value like "<font size=40>x</font>"
+    would silently inject formatting into the generated PDF, and an
+    unclosed tag like "<b" would raise an unhandled ValueError (a 500)
+    from the view. Everything else interpolated into a Paragraph below —
+    law/category names, question text — is admin-authored, but is escaped
+    too as defense in depth.
+    """
+    return _xml_escape(str(text))
 
 
 def _styles():
@@ -113,7 +131,7 @@ def render_scenario_pdf(context):
     styles = _styles()
     story = []
 
-    company_name = context.get("company_name") or "Your business"
+    company_name = _safe(context.get("company_name") or "Your business")
     story.append(Paragraph("Privacy Compliance Summary", styles["DocTitle"]))
     story.append(
         Paragraph(
@@ -163,16 +181,18 @@ def render_scenario_pdf(context):
 
     for section in context["sections"]:
         law = section["law"]
-        story.append(Paragraph(f"{law.code} — {law.full_name}", styles["LawHeading"]))
+        story.append(
+            Paragraph(f"{_safe(law.code)} — {_safe(law.full_name)}", styles["LawHeading"])
+        )
 
         if section["matched_questions"]:
-            reasons = "; ".join(section["matched_questions"])
+            reasons = "; ".join(_safe(q) for q in section["matched_questions"])
             story.append(Paragraph(f"<b>Why it applies:</b> {reasons}", styles["Body"]))
             story.append(Spacer(1, 4))
 
         for entry in section["obligations"]:
-            story.append(Paragraph(entry.category.name, styles["CategoryHeading"]))
-            bullet_text = entry.summary
+            story.append(Paragraph(_safe(entry.category.name), styles["CategoryHeading"]))
+            bullet_text = _safe(entry.summary)
             if not entry.is_verified:
                 bullet_text += " <font color='#b45309'>[unverified — confirm against primary source]</font>"
             story.append(

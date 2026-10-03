@@ -9,9 +9,12 @@ env/
 .DS_Store
 staticfiles/
 
-# Real environment files (the committed template is .env.example)
+# Real environment files (the committed template is .env.example).
+# `.env*.local` also covers `.env.production.local` / `.env.preview.local`,
+# the filenames `vercel env pull --environment=<env>` writes.
 .env
 .env.local
+.env*.local
 
 .vercel
 .mypy_cache/
