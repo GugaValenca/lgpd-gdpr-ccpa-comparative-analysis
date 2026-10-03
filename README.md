@@ -1,5 +1,6 @@
 # LGPD · GDPR · CCPA Comparative Analysis
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-lgpd--gdpr--ccpa--comparative--analysis.vercel.app-000000?style=flat&logo=vercel&logoColor=white)](https://lgpd-gdpr-ccpa-comparative-analysis.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-GugaValenca-181717?style=flat&logo=github&logoColor=white)](https://github.com/GugaValenca)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-gugavalenca-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gugavalenca/)
 
@@ -214,13 +215,12 @@ and the questionnaire's session state is stored in the database too.
    file updates the rows in place.
 5. **Deploy**: `vercel --prod`, or push to the connected branch.
 
-What has been checked so far: the Vercel entrypoint (`api/index.py`) was
-exercised locally with production environment variables and
-`DJANGO_DEBUG=False` — every page, the app's and the admin's static
-files, host-header rejection, and the full questionnaire → result → PDF
-flow with CSRF enabled — and the Postgres switch was confirmed to resolve
-to the `postgresql` engine. It has not yet been run against a live
-Postgres instance or a live Vercel deployment.
+**Live**: deployed at
+[lgpd-gdpr-ccpa-comparative-analysis.vercel.app](https://lgpd-gdpr-ccpa-comparative-analysis.vercel.app),
+on a Neon Postgres database provisioned through Vercel's integration,
+migrated and seeded, with the comparison view, search/filter, the
+compliance-summary questionnaire, its PDF export, and the admin verified
+against the live deployment — not just against the code reading right.
 
 ## About the author
 
